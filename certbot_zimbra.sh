@@ -16,7 +16,7 @@ check_executable () {
 		LEB_BIN=$(which certbot)
 	fi
 	if [ -z "$LEB_BIN" ]; then 
-		LEB_BIN=$(which letsencrypt)
+		LEB_BIN=$(which letsencrypt-auto)
 	fi
 
 	# No way
@@ -69,7 +69,7 @@ function request_certificate() {
 	# Request our cert
 	case $ZMODE in
 		https)
-			$LEB_BIN certonly -a standalone --standalone-supported-challenges http-01 -d $DOMAIN
+			$LEB_BIN certonly --standalone -d $DOMAIN
 			;;
 		*)
 			$LEB_BIN certonly -a webroot -w $WEBROOT -d $DOMAIN
