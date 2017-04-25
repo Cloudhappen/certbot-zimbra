@@ -5,13 +5,8 @@ The script tweaks zimbra's nginx config to allow access of *.well-known* webserv
 
 This is still a BETA script. Tested on:
 * 8.7.2_UBUNTU16
-* 8.6_RHEL7
-* 8.6_UBUNTU12
+* 8.7.7_RHEL7
 
-# Requirements
-
-* zimbra-proxy package is required
-* currently working if [*zimbraReverseProxyMailMode*](https://wiki.zimbra.com/wiki/CLI_zmtlsctl_to_set_Web_Server_Mode) is set to *both* or *https*
 
 # Usage
 
@@ -46,19 +41,7 @@ The `--post-hook` parameter has been added since certbot 0.7.0, so check your ve
 
 The `-d` option is required in order to avoid domain confirmation prompt.
 
-## If you have another webserver in front
 
-*(It may happen even in the best families)*
-
-Say you have apache in front of zimbra (or listening on port 80 only) just run `certbot-auto` to request the certificate for apache, and when done run
-```
-/usr/local/bin/certbot_zimbra.sh --renew --no-nginx
-```
-so that it will deploy the certificate in zimbra without patching nginx.
-
-# License
-
-See [LICENSE](LICENSE).
 
 ### Disclaimer of Warranty
 
@@ -66,6 +49,5 @@ THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
 
 # Author
 
-&copy; Lorenzo Milesi <maxxer@yetopen.it>
+&copy; cjs <chinjs@md.com.my>
 
-Feedback, bugs, PR are welcome on [GitHub](https://github.com/yetopen/certbot-zimbra).
