@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# author: Lorenzo Milesi <maxxer@yetopen.it>
+# author: CJS
 # GPLv3 license
 
-#NO_NGINX="no"
+NO_NGINX="yes"
 RENEW_ONLY="no"
 NEW_CERT="no"
-WEBROOT="/opt/zimbra/data/nginx/html"
 
 ## functions
 # check executable certbot-auto / certbot / letsencrypt
@@ -67,14 +66,8 @@ function request_certificate() {
 
 
 	# Request our cert
-	case $ZMODE in
-		https)
-			$LEB_BIN certonly --standalone -d $DOMAIN
-			;;
-		*)
-			$LEB_BIN certonly -a webroot -w $WEBROOT -d $DOMAIN
-			;;
-	esac
+	$LEB_BIN certonly --standalone -d $DOMAIN
+	
 	if [ $? -ne 0 ] ; then
 		echo "letsencrypt returned an error";
 		exit 1;
@@ -145,6 +138,13 @@ function deploy_certificate() {
 
 }
 
+#deploy cronjob to auto renewal
+function install_crontab() {
+	echo "Install cronjob to run every 1st day of the month"
+	echo "0 2 1 * * certbot-auto renew --post-hook "/root/certbot-zimbra/certbot_zimbra.sh -r -d $(/opt/zimbra/bin/zmhostname)"" >> /etc/crontab
+	crontab /etc/crontab
+}
+
 function check_user () {
 	if [ "$EUID" -ne 0 ]; then
    echo "This script must be run as root" 1>&2
@@ -161,10 +161,9 @@ USAGE: $(basename $0) < -n | -r > [-d my.host.name] [-x] [-w /var/www]
 
 	Optional arguments:"
 	 -d | --hostname: hostname being requested. If not passed uses \`zmhostname\`
-	 -w | --webroot: if there's another webserver on port 80 specify its webroot
 
-Author: Lorenzo Milesi <maxxer@yetopen.it>
-Feedback, bugs and PR are welcome on GitHub: https://github.com/yetopen/certbot-zimbra.
+Author: cjs
+Feedback, bugs and PR are welcome on GitHub: askdhaskjd
 
 Disclaimer:
 THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
@@ -182,9 +181,9 @@ while [[ $# -gt 0 ]]; do
 	    DOMAIN="$2"
 	    shift # past argument
 	    ;;
-	    #-x|--no-nginx)
-	    #NO_NGINX="yes"
-	    #;;
+	    -x|--no-nginx)
+	    NO_NGINX="yes"
+	    ;;
 			-n|--new)
 	  	NEW_CERT="yes"
 	    ;;
@@ -212,7 +211,7 @@ fi
 # actions
 bootstrap
 check_user
-#patch_nginx
 request_certificate
 prepare_certificate
 deploy_certificate
+install_crontab
