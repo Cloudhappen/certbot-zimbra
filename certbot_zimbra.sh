@@ -25,6 +25,12 @@ check_executable () {
 	fi
 }
 
+stop_mailboxandproxy () {
+	su -c 'zmproxyctl stop; zmmailboxdctl stop' - "$zimbra_user" > /dev/null || {
+        error "There were some error during stopping the Zimbra mailbox and proxy."
+        exit 1
+    }
+}
 # version compare from  http://stackoverflow.com/a/24067243/738852
 function version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
 
